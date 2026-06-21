@@ -1,0 +1,1442 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Orthodox Sermon Forge</title>
+  <meta name="description" content="A standalone Byzantine Orthodox sermon research and drafting app." />
+
+  <style>
+    :root {
+      --bg: #080b12;
+      --bg2: #101827;
+      --panel: rgba(20, 29, 46, 0.94);
+      --panel2: rgba(255, 255, 255, 0.045);
+      --gold: #d7b56d;
+      --gold2: #f2d998;
+      --red: #761c24;
+      --red2: #a33b42;
+      --blue: #172d52;
+      --ink: #f8f1e3;
+      --muted: #bdc6d2;
+      --muted2: #8d98a8;
+      --line: rgba(215, 181, 109, 0.32);
+      --good: #86efac;
+      --warn: #fde68a;
+      --bad: #fca5a5;
+      --shadow: 0 22px 70px rgba(0,0,0,.42);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(215,181,109,.2), transparent 35rem),
+        radial-gradient(circle at 90% 10%, rgba(118,28,36,.32), transparent 28rem),
+        radial-gradient(circle at 50% 100%, rgba(23,45,82,.46), transparent 35rem),
+        linear-gradient(135deg, var(--bg), var(--bg2) 52%, #05070b);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 18px;
+      border: 1px solid rgba(215,181,109,.12);
+      border-radius: 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    a { color: var(--gold2); }
+
+    .wrap {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      padding: 42px 0 18px;
+    }
+
+    .hero-card {
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.065), transparent),
+        rgba(12,18,30,.86);
+      box-shadow: var(--shadow);
+      padding: clamp(22px, 4vw, 44px);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-card::after {
+      content: "☦";
+      position: absolute;
+      right: 28px;
+      bottom: -78px;
+      color: rgba(215,181,109,.055);
+      font-size: 230px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .kicker {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--gold2);
+      border: 1px solid rgba(215,181,109,.28);
+      background: rgba(215,181,109,.07);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .cross-badge {
+      width: 84px;
+      height: 84px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--gold2);
+      font-size: 48px;
+      background:
+        radial-gradient(circle, rgba(215,181,109,.2), transparent 68%),
+        rgba(23,45,82,.38);
+      box-shadow: inset 0 0 32px rgba(215,181,109,.12);
+      z-index: 1;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.08;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(38px, 7vw, 82px);
+      color: var(--gold2);
+      letter-spacing: -0.06em;
+      max-width: 860px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 20px);
+      max-width: 900px;
+      margin: 18px 0 0;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0 26px;
+      position: sticky;
+      top: 10px;
+      z-index: 8;
+      padding: 10px;
+      border: 1px solid rgba(215,181,109,.16);
+      border-radius: 999px;
+      background: rgba(8,11,18,.78);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 35px rgba(0,0,0,.24);
+    }
+
+    .nav button, .btn {
+      border: 1px solid rgba(215,181,109,.25);
+      background: rgba(255,255,255,.045);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+
+    .nav button:hover, .btn:hover { transform: translateY(-1px); border-color: rgba(215,181,109,.55); }
+
+    .nav button.active, .btn.primary {
+      background: linear-gradient(135deg, rgba(215,181,109,.28), rgba(118,28,36,.42));
+      border-color: rgba(215,181,109,.62);
+      color: white;
+    }
+
+    .btn.danger {
+      border-color: rgba(252,165,165,.35);
+      background: rgba(118,28,36,.34);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid rgba(215,181,109,.22);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.055), transparent),
+        var(--panel);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .section {
+      display: none;
+      margin-bottom: 34px;
+    }
+
+    .section.active { display: block; }
+
+    .panel-title {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title h2 {
+      font-size: 30px;
+      color: var(--gold2);
+    }
+
+    .panel-title p, .help, .small {
+      color: var(--muted);
+      margin: 6px 0 0;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      color: var(--gold2);
+      font-size: 13px;
+      margin: 14px 0 7px;
+      letter-spacing: .02em;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      color: var(--ink);
+      border: 1px solid rgba(215,181,109,.25);
+      background: rgba(0,0,0,.18);
+      border-radius: 14px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(215,181,109,.72);
+      box-shadow: 0 0 0 4px rgba(215,181,109,.08);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .output {
+      min-height: 640px;
+      white-space: pre-wrap;
+    }
+
+    .sermon-doc {
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: clamp(16px, 2.2vw, 26px);
+    }
+
+    .sermon-doc h2 {
+      color: var(--gold2);
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    .sermon-doc h3 {
+      color: var(--gold2);
+      font-size: 23px;
+      margin: 24px 0 8px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(215,181,109,.2);
+    }
+
+    .sermon-doc p { color: #f3eadc; }
+
+    .sermon-doc ul, .sermon-doc ol {
+      padding-left: 22px;
+      color: #f3eadc;
+    }
+
+    .badgebar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(215,181,109,.22);
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+      font-size: 12px;
+    }
+
+    .badge.good { color: var(--good); border-color: rgba(134,239,172,.32); }
+    .badge.warn { color: var(--warn); border-color: rgba(253,230,138,.32); }
+    .badge.bad { color: var(--bad); border-color: rgba(252,165,165,.32); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid rgba(215,181,109,.2);
+      border-radius: 18px;
+      padding: 16px;
+      background: var(--panel2);
+    }
+
+    .card h3 {
+      color: var(--gold2);
+      font-size: 21px;
+      margin-bottom: 8px;
+    }
+
+    .card p { color: var(--muted); margin: 8px 0; }
+
+    .card .meta {
+      color: var(--muted2);
+      font-size: 12px;
+      margin-top: 12px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .filters input, .filters select {
+      width: auto;
+      min-width: 220px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .view-card {
+      border-left: 4px solid var(--gold);
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .view-card strong { color: var(--gold2); }
+
+    .note {
+      border: 1px solid rgba(253,230,138,.26);
+      background: rgba(253,230,138,.08);
+      border-radius: 16px;
+      padding: 14px;
+      color: #fff7d6;
+      margin: 12px 0;
+    }
+
+    .warning {
+      border-color: rgba(252,165,165,.32);
+      background: rgba(118,28,36,.28);
+      color: #ffe5e5;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .source-item {
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px;
+      color: var(--muted);
+      background: rgba(0,0,0,.14);
+    }
+
+    .source-item strong { color: var(--ink); }
+
+    .saved-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .saved-item {
+      border: 1px solid rgba(215,181,109,.2);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(255,255,255,.04);
+      display: grid;
+      gap: 8px;
+    }
+
+    .footer {
+      color: var(--muted2);
+      padding: 20px 0 46px;
+      font-size: 13px;
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 36px 18px;
+      border: 1px dashed rgba(215,181,109,.24);
+      border-radius: 18px;
+      background: rgba(255,255,255,.025);
+    }
+
+    @media (max-width: 980px) {
+      .grid, .two {
+        grid-template-columns: 1fr;
+      }
+
+      .cards {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero-card {
+        grid-template-columns: 1fr;
+      }
+
+      .cross-badge {
+        display: none;
+      }
+
+      .nav {
+        border-radius: 18px;
+        position: static;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .cards, .row {
+        grid-template-columns: 1fr;
+      }
+
+      .wrap {
+        width: min(100% - 20px, 1240px);
+      }
+
+      body::before { display: none; }
+
+      .panel { padding: 15px; }
+
+      .nav button, .btn {
+        width: 100%;
+      }
+
+      .filters input, .filters select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero-card">
+        <div>
+          <div class="kicker">☦ Byzantine Orthodox • Conservative Evidence Mode • Family Study</div>
+          <h1>Orthodox Sermon Forge</h1>
+          <p class="subtitle">
+            A standalone sermon-building workspace for Scripture, original-language research checkpoints,
+            patristic teaching, archaeology, secular history, and careful eschatology comparison.
+          </p>
+          <div class="badgebar">
+            <span class="badge good">Works as a single HTML file</span>
+            <span class="badge warn">No login</span>
+            <span class="badge">Saves in this browser</span>
+            <span class="badge">No API key required for local mode</span>
+            <span class="badge warn" id="backendBadge">Backend: checking</span>
+          </div>
+        </div>
+        <div class="cross-badge" aria-hidden="true">☦</div>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="Main sections">
+      <button class="active" data-tab="builder">Sermon Builder</button>
+      <button data-tab="evidence">Evidence Ledger</button>
+      <button data-tab="eschatology">Eschatology</button>
+      <button data-tab="fathers">Church Fathers</button>
+      <button data-tab="saved">Saved Sermons</button>
+      <button data-tab="guide">Deployment Guide</button>
+    </nav>
+
+    <main>
+      <section id="builder" class="section active">
+        <div class="grid">
+          <aside class="panel">
+            <div class="panel-title">
+              <div>
+                <h2>Create Sermon</h2>
+                <p>Enter a passage or topic. The app will build a conservative Orthodox sermon scaffold from the built-in research cards.</p>
+              </div>
+            </div>
+
+            <label for="passage">Bible passage or topic</label>
+            <input id="passage" value="John 1:1-14" placeholder="Example: John 1:1-14, Genesis 1, Matthew 24, Resurrection" />
+
+            <label for="theme">Sermon theme</label>
+            <input id="theme" value="The Word became flesh for our salvation" placeholder="Example: repentance, resurrection, the Kingdom of God" />
+
+            <div class="row">
+              <div>
+                <label for="audience">Audience</label>
+                <select id="audience">
+                  <option>Family devotion</option>
+                  <option>Adult Bible study</option>
+                  <option>Teen study</option>
+                  <option>Homily draft</option>
+                  <option>Catechism lesson</option>
+                </select>
+              </div>
+              <div>
+                <label for="length">Length</label>
+                <select id="length">
+                  <option>Short</option>
+                  <option selected>Medium</option>
+                  <option>Long</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="mode">History / archaeology mode</label>
+                <select id="mode">
+                  <option selected>Evidence-focused</option>
+                  <option>Apologetics-focused</option>
+                </select>
+              </div>
+              <div>
+                <label for="father">Patristic emphasis</label>
+                <select id="father">
+                  <option selected>Balanced: Chrysostom, Basil, Gregory</option>
+                  <option>St. John Chrysostom</option>
+                  <option>St. Basil the Great</option>
+                  <option>St. Gregory the Theologian</option>
+                </select>
+              </div>
+            </div>
+
+            <label for="notes">Your notes, questions, or concerns</label>
+            <textarea id="notes" placeholder="Add family questions, pastoral concerns, or things you want checked carefully."></textarea>
+
+            <div class="actions">
+              <button class="btn primary" id="generateBtn">Generate local sermon</button>
+              <button class="btn" id="backendBtn">Generate with backend AI</button>
+              <button class="btn" id="copyBtn">Copy sermon</button>
+              <button class="btn" id="saveBtn">Save sermon</button>
+              <button class="btn" id="downloadBtn">Download .md</button>
+            </div>
+
+            <div class="note">
+              <strong>Conservative use note:</strong> this app will not pretend it has proven every biblical claim.
+              It separates manuscript evidence, archaeological context, theological interpretation, and application.
+            </div>
+          </aside>
+
+          <article class="panel">
+            <div class="panel-title">
+              <div>
+                <h2>Sermon Draft</h2>
+                <p>Generated locally by default. When deployed with Cloudflare Pages Functions, backend AI can create a deeper draft without exposing your API key.</p>
+              </div>
+            </div>
+            <div id="sermonOutput" class="sermon-doc">
+              <h2>Ready to build</h2>
+              <p>Enter a passage, choose the mode, then click <strong>Generate sermon</strong>.</p>
+              <div class="note">
+                For a truly exhaustive sermon on any verse in the Bible, use this static app as the framework,
+                then verify quotations, manuscript data, archaeology, and patristic references against primary sources
+                before teaching.
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="evidence" class="section">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>Evidence Ledger</h2>
+              <p>Archaeology, manuscript witnesses, and secular-history notes. These cards are intentionally conservative.</p>
+            </div>
+          </div>
+
+          <div class="filters">
+            <input id="evidenceSearch" placeholder="Search evidence: Pilate, Cyrus, Tel Dan, John..." />
+            <select id="evidenceType">
+              <option value="all">All categories</option>
+              <option value="Archaeology">Archaeology</option>
+              <option value="Manuscript">Manuscript</option>
+              <option value="Secular history">Secular history</option>
+              <option value="Caution">Caution</option>
+            </select>
+          </div>
+
+          <div id="evidenceCards" class="cards"></div>
+        </div>
+      </section>
+
+      <section id="eschatology" class="section">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>Eschatology Comparison</h2>
+              <p>End-times passages compared across Orthodox, Catholic, Protestant, Jewish/Second Temple, and secular-historical readings.</p>
+            </div>
+          </div>
+
+          <label for="eschatologySelect">Choose a prophecy or passage group</label>
+          <select id="eschatologySelect"></select>
+
+          <div id="eschatologyOutput" class="comparison"></div>
+        </div>
+      </section>
+
+      <section id="fathers" class="section">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>Church Fathers Index</h2>
+              <p>Starter index for the three major Orthodox saints you selected.</p>
+            </div>
+          </div>
+
+          <div id="fatherCards" class="cards"></div>
+        </div>
+      </section>
+
+      <section id="saved" class="section">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>Saved Sermons</h2>
+              <p>Saved only in this browser using localStorage. No account and no cloud database.</p>
+            </div>
+            <button class="btn danger" id="clearSavedBtn">Clear saved</button>
+          </div>
+
+          <div id="savedList" class="saved-list"></div>
+        </div>
+      </section>
+
+      <section id="guide" class="section">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>Deployment Guide</h2>
+              <p>This static version is built to avoid the blank-page problem.</p>
+            </div>
+          </div>
+
+          <div class="two">
+            <div class="card">
+              <h3>Files needed</h3>
+              <p>This package only requires one live app file:</p>
+              <pre><code>orthodox-sermon-forge-static/
+  index.html
+  README.md</code></pre>
+              <p>Only <strong>index.html</strong> is required for the website to run.</p>
+            </div>
+
+            <div class="card">
+              <h3>Cloudflare Pages settings</h3>
+              <p>Use these settings for this static package:</p>
+              <pre><code>Framework preset: None
+Build command: Leave blank
+Build output directory: /</code></pre>
+              <p>Do not use Vite settings for this standalone version.</p>
+            </div>
+          </div>
+
+          <h3 style="margin-top:22px;color:var(--gold2);">Git Bash upload commands</h3>
+          <pre><code>cd ~/Desktop/orthodox-sermon-forge-static
+
+git init
+git add .
+git commit -m "Deploy standalone Orthodox Sermon Forge"
+git branch -M main
+git remote add origin https://github.com/YOUR-GITHUB-USERNAME/orthodox-sermon-forge-static.git
+git push -u origin main</code></pre>
+
+          <div class="note warning">
+            <strong>Safety warning:</strong> do not upload API keys, passwords, .env files, proprietary company data,
+            customer data, copyrighted books you do not have rights to publish, or confidential pastoral/family notes to GitHub.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      Orthodox Sermon Forge is a study aid, not a substitute for Holy Scripture, the liturgical life of the Church, pastoral guidance, or verification against primary sources.
+    </footer>
+  </div>
+
+<script>
+const DATA = {
+  fathers: [
+    {
+      name: "St. John Chrysostom",
+      focus: "Scripture preached plainly, moral repentance, mercy, almsgiving, reverence before the Eucharistic and ecclesial life.",
+      use: "Excellent for direct sermon application, warning against hypocrisy, and calling the household to concrete obedience.",
+      cautions: "Do not use him as a proof-text machine. Read homilies in context and distinguish rhetoric from dogmatic definition.",
+      works: ["Homilies on Matthew", "Homilies on John", "Homilies on Romans", "On the Priesthood"]
+    },
+    {
+      name: "St. Basil the Great",
+      focus: "Creation, ordered worship, ascetic discipline, care for the poor, Trinitarian orthodoxy, and the Holy Spirit.",
+      use: "Excellent for Genesis, creation, stewardship, fasting, family discipline, mercy, and doctrine tied to worship.",
+      cautions: "When discussing creation, separate Basil's theological teaching from modern scientific claims he was not addressing.",
+      works: ["Hexaemeron", "On the Holy Spirit", "Longer Rules", "Letters"]
+    },
+    {
+      name: "St. Gregory the Theologian",
+      focus: "The mystery of God, the Incarnation, the Trinity, apophatic reverence, and doctrinal precision.",
+      use: "Excellent for sermons on the Word, the Trinity, Christology, theological humility, and worshipful wonder.",
+      cautions: "Do not flatten his theology into slogans. His method teaches restraint before divine mystery.",
+      works: ["Theological Orations", "Oration 38 On Theophany", "Oration 45 On Pascha"]
+    }
+  ],
+
+  languageNotes: [
+    {
+      key: ["john 1", "word", "logos", "incarnation"],
+      title: "Logos / Word",
+      note: "For John 1, check the Greek term Logos. In Orthodox preaching, the point is not merely abstract reason but the eternal Son who is personally God and becomes flesh for our salvation.",
+      caution: "Avoid saying the term simply means Greek philosophy. John uses language in a biblical and theological way that must be read with Genesis, Wisdom themes, and the Church's confession of Christ."
+    },
+    {
+      key: ["repent", "repentance", "metanoia"],
+      title: "Metanoia / Repentance",
+      note: "The Greek metanoia points to a changed mind, reorientation, and return to God. Orthodox application should include confession, prayer, fasting, reconciliation, and transformed conduct.",
+      caution: "Avoid reducing repentance to emotion or to a one-time private decision."
+    },
+    {
+      key: ["church", "ekklesia"],
+      title: "Ekklesia / Church",
+      note: "The Church is not merely a voluntary association. Preach it as the gathered people of God, the Body of Christ, and the household formed by sacrament, doctrine, worship, and obedience.",
+      caution: "Avoid treating the Church as a modern club or as an invisible idea detached from liturgical life."
+    },
+    {
+      key: ["kingdom", "basileia"],
+      title: "Basileia / Kingdom",
+      note: "The Kingdom of God is God's reign and presence breaking into the world, fulfilled in Christ and anticipated in the life of the Church.",
+      caution: "Avoid making the Kingdom only political, only future, or only inward."
+    },
+    {
+      key: ["end", "last days", "matthew 24", "revelation", "daniel", "parousia"],
+      title: "Parousia / Coming",
+      note: "When preaching end-times texts, distinguish Christ's final appearing, judgment, tribulation language, temple imagery, and immediate first-century context where applicable.",
+      caution: "Avoid date-setting and sensational certainty. Orthodox preaching emphasizes watchfulness, repentance, endurance, and hope."
+    },
+    {
+      key: ["spirit", "holy spirit", "pneuma"],
+      title: "Pneuma / Spirit",
+      note: "In Greek, pneuma can mean spirit, breath, or wind depending on context. Orthodox preaching must confess the Holy Spirit as Lord and giver of life, not an impersonal force.",
+      caution: "Avoid collapsing the Spirit into a mood, symbol, or vague energy."
+    },
+    {
+      key: ["love", "agape"],
+      title: "Agape / Love",
+      note: "Agape is self-giving love revealed in Christ. Sermons should connect love to sacrifice, truth, forgiveness, enemy-love, and communion with God.",
+      caution: "Avoid defining love as mere affirmation or sentiment."
+    },
+    {
+      key: ["faith", "pistis"],
+      title: "Pistis / Faith",
+      note: "Pistis includes trust, faithfulness, and allegiance. In Orthodox preaching, faith is living participation in Christ, not mere mental agreement.",
+      caution: "Avoid separating faith from obedience, sacraments, repentance, and love."
+    }
+  ],
+
+  manuscripts: [
+    {
+      name: "Dead Sea Scrolls",
+      scope: "Second Temple Jewish manuscript witnesses, especially important for Hebrew Bible textual history.",
+      use: "Helpful when discussing the antiquity and transmission of Old Testament textual traditions.",
+      caution: "They do not prove every theological claim; they are textual witnesses."
+    },
+    {
+      name: "Septuagint",
+      scope: "Ancient Greek Old Testament tradition used deeply in early Christianity and Orthodox liturgical/theological life.",
+      use: "Primary Old Testament comparison point for this app's Orthodox orientation.",
+      caution: "Compare with Hebrew textual tradition carefully; do not pretend all textual questions are simple."
+    },
+    {
+      name: "Codex Vaticanus",
+      scope: "Major fourth-century Greek biblical codex.",
+      use: "Important witness for Septuagint and New Testament textual comparison.",
+      caution: "A manuscript witness is not identical with an autograph."
+    },
+    {
+      name: "Codex Sinaiticus",
+      scope: "Major fourth-century Greek biblical codex.",
+      use: "Important for New Testament and Septuagint textual history.",
+      caution: "Variant readings must be handled by textual criticism, not internet claims."
+    },
+    {
+      name: "Codex Alexandrinus",
+      scope: "Major fifth-century Greek biblical codex.",
+      use: "Useful in comparing later major textual witnesses.",
+      caution: "Its importance depends on passage and textual tradition."
+    }
+  ],
+
+  evidence: [
+    {
+      title: "Pontius Pilate inscription",
+      type: "Archaeology",
+      confidence: "High",
+      supports: "Confirms Pontius Pilate as a historical Roman prefect connected with Judea.",
+      conservative: "Supports the historical setting of the Passion narratives; it does not by itself prove the Resurrection.",
+      related: ["gospels", "john", "matthew", "luke", "mark", "passion", "trial", "pilate"]
+    },
+    {
+      title: "Tacitus and Roman references to Christians",
+      type: "Secular history",
+      confidence: "High",
+      supports: "Shows early Roman awareness of Christians and their connection to Christ under Pontius Pilate.",
+      conservative: "Useful for external historical context; it is not a theological source and must be read as hostile Roman testimony.",
+      related: ["christ", "crucifixion", "rome", "early church", "persecution"]
+    },
+    {
+      title: "Tel Dan Stele",
+      type: "Archaeology",
+      confidence: "High",
+      supports: "Often cited as significant extrabiblical evidence for a dynastic reference associated with the house of David.",
+      conservative: "Supports that Davidic dynastic memory was historically anchored; it does not settle every detail of Samuel/Kings.",
+      related: ["david", "kingdom", "old testament", "messiah", "psalms"]
+    },
+    {
+      title: "Mesha Stele",
+      type: "Archaeology",
+      confidence: "High",
+      supports: "Moabite royal inscription that gives external context for conflicts involving Moab and Israel.",
+      conservative: "Shows overlapping regional history; interpretation of specific biblical alignments must be careful.",
+      related: ["moab", "kings", "old testament", "israel"]
+    },
+    {
+      title: "Cyrus Cylinder",
+      type: "Secular history",
+      confidence: "High",
+      supports: "Persian imperial policy context related to return, restoration, and temple rebuilding themes.",
+      conservative: "Provides historical context for Persian policy; do not claim it directly proves every detail of Ezra-Nehemiah.",
+      related: ["cyrus", "ezra", "nehemiah", "exile", "return", "isaiah"]
+    },
+    {
+      title: "Hezekiah's Tunnel and Siloam inscription",
+      type: "Archaeology",
+      confidence: "High",
+      supports: "Context for Jerusalem waterworks traditionally associated with Hezekiah's preparations.",
+      conservative: "Strongly relevant to the historical setting; details should be compared with current archaeological literature.",
+      related: ["hezekiah", "isaiah", "kings", "jerusalem", "siloam"]
+    },
+    {
+      title: "Lachish reliefs and letters",
+      type: "Archaeology",
+      confidence: "High",
+      supports: "Assyrian and Judean evidence for military crisis in the late monarchy period.",
+      conservative: "Strong background evidence for the world of Kings, Chronicles, and prophetic literature.",
+      related: ["lachish", "assyria", "isaiah", "kings", "jeremiah"]
+    },
+    {
+      title: "Pool of Bethesda",
+      type: "Archaeology",
+      confidence: "Moderate to High",
+      supports: "Archaeological remains align with the kind of Jerusalem setting described in John 5.",
+      conservative: "Supports topographical plausibility, not every theological claim in the passage.",
+      related: ["john 5", "healing", "bethesda", "jerusalem"]
+    },
+    {
+      title: "Crucifixion remains of Yehohanan",
+      type: "Archaeology",
+      confidence: "High",
+      supports: "Physical evidence that Roman crucifixion occurred in the region and period.",
+      conservative: "Supports historical plausibility of crucifixion practices; not direct evidence of Jesus' crucifixion.",
+      related: ["cross", "crucifixion", "passion", "gospels"]
+    },
+    {
+      title: "Manuscript variants",
+      type: "Caution",
+      confidence: "Required",
+      supports: "Textual variants exist and should be studied honestly through textual criticism.",
+      conservative: "Do not hide variants; explain what they affect and what they do not affect.",
+      related: ["manuscript", "variant", "textual criticism", "bible"]
+    }
+  ],
+
+  eschatology: [
+    {
+      title: "Matthew 24 / Olivet Discourse",
+      passage: "Matthew 24; Mark 13; Luke 21",
+      orthodox: "Orthodox preaching commonly emphasizes watchfulness, repentance, endurance, false-teacher discernment, and the mystery of Christ's return. Some elements are read with reference to Jerusalem and the temple, while final judgment remains future and certain.",
+      catholic: "Often similar in moral emphasis, with attention to both historical fulfillment and final consummation.",
+      protestant: "Views vary widely: preterist, historicist, futurist, dispensational, and idealist readings all appear in Protestant history.",
+      jewish: "Second Temple expectations about tribulation, temple, nations, and divine intervention form important context, though Christian interpretation centers on Christ.",
+      secular: "Historical-critical discussion often emphasizes first-century Judea, Roman power, apocalyptic language, and the destruction of Jerusalem in AD 70.",
+      teachers: "St. John Chrysostom, Augustine, many Reformation commentators, modern preterist and futurist teachers.",
+      caution: "Do not set dates. Separate the AD 70 historical horizon from final-parousia claims where the text requires it."
+    },
+    {
+      title: "Daniel's Kingdoms and Son of Man",
+      passage: "Daniel 2, 7, 9, 12",
+      orthodox: "Orthodox interpretation sees Christ as the true Son of Man and His Kingdom as the fulfillment that surpasses earthly empires.",
+      catholic: "Often Christological and ecclesial, with attention to empire imagery and final hope.",
+      protestant: "Interpretations range from historicist timelines to futurist prophecy schemes to Christ-centered readings.",
+      jewish: "Jewish interpretation may read the Son of Man corporately, angelically, or messianically depending on source and period.",
+      secular: "Academic readings often situate Daniel's apocalyptic visions in relation to imperial oppression and Second Temple crisis.",
+      teachers: "Church Fathers, medieval commentators, Reformation historicists, modern apocalyptic scholars.",
+      caution: "Avoid forcing Daniel into newspaper prediction charts without textual and historical control."
+    },
+    {
+      title: "Revelation / Apocalypse",
+      passage: "Revelation 1-22",
+      orthodox: "Orthodox use emphasizes worship, martyrdom, spiritual warfare, patient endurance, the defeat of evil, and the final renewal of creation in Christ.",
+      catholic: "Often liturgical, sacramental, moral, and final-judgment oriented, with varied symbolic interpretation.",
+      protestant: "Major views include futurist, historicist, preterist, and idealist readings; dispensational readings are a later Protestant development.",
+      jewish: "Jewish apocalyptic imagery informs symbols of beasts, heavenly throne-room scenes, judgment, and restoration.",
+      secular: "Historical-critical readings often connect Revelation to imperial pressure, coded resistance, and apocalyptic literature.",
+      teachers: "Andrew of Caesarea is especially important in the Greek tradition; many later teachers differ sharply.",
+      caution: "Revelation should be preached with worship and repentance at the center, not fear-based speculation."
+    },
+    {
+      title: "Antichrist and Deception",
+      passage: "1 John 2; 2 Thessalonians 2; Revelation 13",
+      orthodox: "Orthodox preaching warns against deception, pride, lawlessness, and false worship. The spirit of antichrist is already active wherever Christ is denied.",
+      catholic: "Similar moral and doctrinal caution, often connected with final apostasy and deception.",
+      protestant: "Varied identifications across history include institutions, individuals, ideologies, and future figures.",
+      jewish: "Not generally framed as Antichrist in the Christian sense, but themes of wicked rulers and final enemies exist in apocalyptic settings.",
+      secular: "Scholars often examine imperial cult, political power, and symbolic resistance literature.",
+      teachers: "St. John Chrysostom, Irenaeus, Hippolytus, Reformation polemicists, modern futurist teachers.",
+      caution: "Avoid naming current people as Antichrist. Teach discernment, humility, and faithfulness."
+    }
+  ]
+};
+
+let currentMarkdown = "";
+
+function clean(value) {
+  return String(value || "").trim();
+}
+
+function includesAny(text, keys) {
+  const lower = text.toLowerCase();
+  return keys.some(k => lower.includes(k.toLowerCase()));
+}
+
+function confidenceClass(confidence) {
+  if (String(confidence).toLowerCase().includes("high")) return "good";
+  if (String(confidence).toLowerCase().includes("moderate")) return "warn";
+  return "";
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function markdownToHtml(md) {
+  const lines = md.split("\n");
+  let html = "";
+  let inList = false;
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+
+    if (!line.trim()) {
+      if (inList) { html += "</ul>"; inList = false; }
+      continue;
+    }
+
+    if (line.startsWith("## ")) {
+      if (inList) { html += "</ul>"; inList = false; }
+      html += `<h3>${escapeHtml(line.slice(3))}</h3>`;
+    } else if (line.startsWith("# ")) {
+      if (inList) { html += "</ul>"; inList = false; }
+      html += `<h2>${escapeHtml(line.slice(2))}</h2>`;
+    } else if (line.startsWith("- ")) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += `<li>${escapeHtml(line.slice(2))}</li>`;
+    } else {
+      if (inList) { html += "</ul>"; inList = false; }
+      html += `<p>${escapeHtml(line)}</p>`;
+    }
+  }
+
+  if (inList) html += "</ul>";
+  return html;
+}
+
+function selectedFathers(fatherChoice) {
+  if (fatherChoice.includes("Chrysostom")) return DATA.fathers.filter(f => f.name.includes("Chrysostom"));
+  if (fatherChoice.includes("Basil")) return DATA.fathers.filter(f => f.name.includes("Basil"));
+  if (fatherChoice.includes("Gregory")) return DATA.fathers.filter(f => f.name.includes("Gregory"));
+  return DATA.fathers;
+}
+
+function matchingLanguageNotes(searchText) {
+  const matches = DATA.languageNotes.filter(n => includesAny(searchText, n.key));
+  return matches.length ? matches : [
+    {
+      title: "Original-language checkpoint required",
+      note: "No built-in term matched automatically. Before teaching, check the Hebrew, Aramaic, or Greek wording using a reliable lexicon and compare the Septuagint for Old Testament passages or the Greek New Testament for New Testament passages.",
+      caution: "Do not build doctrine from an English word study alone."
+    }
+  ];
+}
+
+function matchingEvidence(searchText) {
+  const matches = DATA.evidence.filter(e => includesAny(searchText, e.related.concat([e.title, e.type])));
+  return matches.length ? matches : DATA.evidence.slice(0, 4);
+}
+
+function generateSermon() {
+  const passage = clean(document.getElementById("passage").value) || "Selected passage";
+  const theme = clean(document.getElementById("theme").value) || "Faithfulness to Christ";
+  const audience = clean(document.getElementById("audience").value);
+  const length = clean(document.getElementById("length").value);
+  const mode = clean(document.getElementById("mode").value);
+  const fatherChoice = clean(document.getElementById("father").value);
+  const notes = clean(document.getElementById("notes").value);
+  const searchText = `${passage} ${theme} ${notes}`;
+
+  const fathers = selectedFathers(fatherChoice);
+  const langNotes = matchingLanguageNotes(searchText);
+  const evidence = matchingEvidence(searchText);
+  const isApologetics = mode.includes("Apologetics");
+
+  const fatherLines = fathers.map(f =>
+    `- ${f.name}: ${f.focus} Sermon use: ${f.use}`
+  ).join("\n");
+
+  const langLines = langNotes.map(n =>
+    `- ${n.title}: ${n.note} Caution: ${n.caution}`
+  ).join("\n");
+
+  const evidenceLines = evidence.map(e =>
+    `- ${e.title} [${e.type}; confidence: ${e.confidence}]. Supports: ${e.supports} Conservative boundary: ${e.conservative}`
+  ).join("\n");
+
+  const manuscriptLines = DATA.manuscripts.map(m =>
+    `- ${m.name}: ${m.scope} Use: ${m.use} Caution: ${m.caution}`
+  ).join("\n");
+
+  const apologeticsParagraph = isApologetics
+    ? "In apologetics mode, present historical and archaeological evidence as cumulative support for the biblical world, while refusing to overstate what any artifact can prove. The goal is sober confidence, not exaggeration."
+    : "In evidence-focused mode, present each claim by category: textual witness, archaeological context, secular-historical reference, theological interpretation, and pastoral application. Do not merge these categories.";
+
+  currentMarkdown =
+`# ${theme}
+
+## Scripture Passage
+${passage}
+
+## Working Sermon Aim
+For ${audience.toLowerCase()}, preach ${passage} so that the hearers see Christ, understand the passage in the life of the Church, repent where needed, and practice faithful obedience at home.
+
+## Conservative Source Boundary
+This sermon draft is a study scaffold. Before teaching publicly, verify direct quotations, manuscript claims, archaeology, and patristic references against primary or scholarly sources. Do not invent evidence. Do not claim certainty where the evidence is partial, debated, or interpretive.
+
+## Historical and Canonical Context
+Begin by locating ${passage} inside the whole story of Scripture: creation, fall, covenant, Israel, prophecy, Incarnation, Cross, Resurrection, Pentecost, Church, judgment, and new creation. For Old Testament passages, compare the Hebrew textual tradition and the Septuagint. For New Testament passages, check the Greek text and major manuscript witnesses.
+
+## Original-Language Notes
+${langLines}
+
+## Oldest Manuscript and Textual Witness Checkpoints
+${manuscriptLines}
+
+## Patristic Lens
+${fatherLines}
+
+## Orthodox Doctrinal Teaching
+Preach from inside the worshiping life of the Church. Keep the sermon centered on Christ, the Holy Trinity, repentance, communion with God, humility, prayer, mercy, and participation in the life of the Church. Avoid reducing the passage to politics, self-help, speculation, or private opinion.
+
+## Archaeology, Secular History, and External Evidence
+${apologeticsParagraph}
+
+${evidenceLines}
+
+## What This Evidence Can and Cannot Prove
+- It can often confirm people, places, customs, political settings, scribal transmission, and historical plausibility.
+- It can sometimes correct modern assumptions about the biblical world.
+- It cannot, by itself, prove mysteries such as the Incarnation, Resurrection, Eucharist, or final judgment.
+- These mysteries are confessed by the Church on the basis of revelation, apostolic witness, worship, and the life of the Holy Spirit.
+
+## Sermon Body
+1. Open the text slowly. Read the passage aloud and identify the central action of God.
+2. Explain the context. Show what came before and after the passage.
+3. Bring in the language checkpoint. Use the original language only where it clarifies the text.
+4. Bring in the Fathers. Let Chrysostom press the moral call, Basil order the life of worship and discipline, and Gregory guard the mystery of God.
+5. Apply the passage to the household. Ask: what must we confess, repent of, forgive, practice, stop, or begin?
+6. Close with Christ. The sermon should not end with human effort alone but with grace, worship, and hope.
+
+## Warnings Against Misinterpretation
+- Do not use archaeology as a substitute for faith.
+- Do not make a doctrine from one English word.
+- Do not flatten Orthodox theology into generic moralism.
+- Do not use the Fathers out of context to win arguments.
+- Do not set dates for the end times.
+- Do not turn prophecy into entertainment.
+- Do not hide uncertainty; label it honestly.
+
+## Family Application
+This week, the family should read ${passage} together, name one concrete act of repentance, choose one act of mercy, and pray for humility before the mystery of God. Parents should model reverence, not merely demand it.
+
+## Closing Prayer
+O Lord Jesus Christ, eternal Word of the Father, illumine our hearts by the Holy Spirit. Teach us to hear the Scriptures in the life of Your Church, to repent without excuse, to love without hypocrisy, and to stand watchfully in hope until Your appearing. Amen.
+
+## Your Added Notes
+${notes || "No additional notes entered."}
+`;
+
+  document.getElementById("sermonOutput").innerHTML = markdownToHtml(currentMarkdown);
+}
+
+async function copySermon() {
+  if (!currentMarkdown) generateSermon();
+  try {
+    await navigator.clipboard.writeText(currentMarkdown);
+    alert("Sermon copied to clipboard.");
+  } catch {
+    const box = document.createElement("textarea");
+    box.value = currentMarkdown;
+    document.body.appendChild(box);
+    box.select();
+    document.execCommand("copy");
+    box.remove();
+    alert("Sermon copied to clipboard.");
+  }
+}
+
+function saveSermon() {
+  if (!currentMarkdown) generateSermon();
+  const titleLine = currentMarkdown.split("\n")[0].replace("# ", "");
+  const saved = JSON.parse(localStorage.getItem("sermons") || "[]");
+  saved.unshift({
+    id: Date.now(),
+    title: titleLine,
+    date: new Date().toLocaleString(),
+    markdown: currentMarkdown
+  });
+  localStorage.setItem("sermons", JSON.stringify(saved.slice(0, 50)));
+  renderSaved();
+  alert("Sermon saved in this browser.");
+}
+
+function downloadMarkdown() {
+  if (!currentMarkdown) generateSermon();
+  const blob = new Blob([currentMarkdown], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const safeName = (document.getElementById("theme").value || "orthodox-sermon")
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  a.href = url;
+  a.download = `${safeName || "orthodox-sermon"}.md`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function renderEvidence() {
+  const query = clean(document.getElementById("evidenceSearch")?.value || "").toLowerCase();
+  const type = document.getElementById("evidenceType")?.value || "all";
+  const cards = DATA.evidence.filter(e => {
+    const text = `${e.title} ${e.type} ${e.confidence} ${e.supports} ${e.conservative} ${e.related.join(" ")}`.toLowerCase();
+    const queryOk = !query || text.includes(query);
+    const typeOk = type === "all" || e.type === type;
+    return queryOk && typeOk;
+  });
+
+  document.getElementById("evidenceCards").innerHTML = cards.map(e => `
+    <article class="card">
+      <div class="badgebar">
+        <span class="badge">${escapeHtml(e.type)}</span>
+        <span class="badge ${confidenceClass(e.confidence)}">Confidence: ${escapeHtml(e.confidence)}</span>
+      </div>
+      <h3>${escapeHtml(e.title)}</h3>
+      <p><strong>Supports:</strong> ${escapeHtml(e.supports)}</p>
+      <p><strong>Conservative boundary:</strong> ${escapeHtml(e.conservative)}</p>
+      <p class="meta">Related: ${escapeHtml(e.related.join(", "))}</p>
+    </article>
+  `).join("") || `<div class="empty">No evidence cards matched that search.</div>`;
+}
+
+function renderFathers() {
+  document.getElementById("fatherCards").innerHTML = DATA.fathers.map(f => `
+    <article class="card">
+      <h3>${escapeHtml(f.name)}</h3>
+      <p><strong>Primary focus:</strong> ${escapeHtml(f.focus)}</p>
+      <p><strong>How to use:</strong> ${escapeHtml(f.use)}</p>
+      <p><strong>Caution:</strong> ${escapeHtml(f.cautions)}</p>
+      <p class="meta">Starter works: ${escapeHtml(f.works.join(", "))}</p>
+    </article>
+  `).join("");
+}
+
+function renderEschatologyOptions() {
+  const select = document.getElementById("eschatologySelect");
+  select.innerHTML = DATA.eschatology.map((e, idx) => `<option value="${idx}">${escapeHtml(e.title)} — ${escapeHtml(e.passage)}</option>`).join("");
+  renderEschatology();
+}
+
+function renderEschatology() {
+  const idx = Number(document.getElementById("eschatologySelect").value || 0);
+  const e = DATA.eschatology[idx];
+  document.getElementById("eschatologyOutput").innerHTML = `
+    <div class="card">
+      <h3>${escapeHtml(e.title)}</h3>
+      <p><strong>Passages:</strong> ${escapeHtml(e.passage)}</p>
+      <div class="note warning"><strong>Caution:</strong> ${escapeHtml(e.caution)}</div>
+    </div>
+    <div class="view-card"><strong>Orthodox reading:</strong><br>${escapeHtml(e.orthodox)}</div>
+    <div class="view-card"><strong>Catholic comparison:</strong><br>${escapeHtml(e.catholic)}</div>
+    <div class="view-card"><strong>Protestant comparison:</strong><br>${escapeHtml(e.protestant)}</div>
+    <div class="view-card"><strong>Jewish / Second Temple context:</strong><br>${escapeHtml(e.jewish)}</div>
+    <div class="view-card"><strong>Secular-historical reading:</strong><br>${escapeHtml(e.secular)}</div>
+    <div class="view-card"><strong>Historical teachers and streams:</strong><br>${escapeHtml(e.teachers)}</div>
+  `;
+}
+
+function renderSaved() {
+  const saved = JSON.parse(localStorage.getItem("sermons") || "[]");
+  const target = document.getElementById("savedList");
+  if (!saved.length) {
+    target.innerHTML = `<div class="empty">No sermons saved yet. Generate a sermon and click Save sermon.</div>`;
+    return;
+  }
+
+  target.innerHTML = saved.map(item => `
+    <div class="saved-item">
+      <strong>${escapeHtml(item.title)}</strong>
+      <span class="small">${escapeHtml(item.date)}</span>
+      <div class="actions">
+        <button class="btn" onclick="loadSaved(${item.id})">Open</button>
+        <button class="btn" onclick="copySaved(${item.id})">Copy</button>
+        <button class="btn danger" onclick="deleteSaved(${item.id})">Delete</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function loadSaved(id) {
+  const saved = JSON.parse(localStorage.getItem("sermons") || "[]");
+  const item = saved.find(s => s.id === id);
+  if (!item) return;
+  currentMarkdown = item.markdown;
+  document.getElementById("sermonOutput").innerHTML = markdownToHtml(currentMarkdown);
+  switchTab("builder");
+}
+
+async function copySaved(id) {
+  const saved = JSON.parse(localStorage.getItem("sermons") || "[]");
+  const item = saved.find(s => s.id === id);
+  if (!item) return;
+  await navigator.clipboard.writeText(item.markdown);
+  alert("Saved sermon copied.");
+}
+
+function deleteSaved(id) {
+  const saved = JSON.parse(localStorage.getItem("sermons") || "[]");
+  localStorage.setItem("sermons", JSON.stringify(saved.filter(s => s.id !== id)));
+  renderSaved();
+}
+
+function clearSaved() {
+  if (confirm("Clear all saved sermons from this browser?")) {
+    localStorage.removeItem("sermons");
+    renderSaved();
+  }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.id === tab));
+  document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll(".nav button").forEach(btn => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+});
+
+
+async function checkBackendHealth() {
+  const badge = document.getElementById("backendBadge");
+  if (!badge) return;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+
+    const response = await fetch("/api/health", {
+      method: "GET",
+      headers: { "Accept": "application/json" },
+      signal: controller.signal
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) throw new Error("Health check failed");
+    const data = await response.json();
+
+    if (data.openAiConfigured) {
+      badge.textContent = "Backend: AI ready";
+      badge.className = "badge good";
+    } else {
+      badge.textContent = "Backend: add OPENAI_API_KEY";
+      badge.className = "badge warn";
+    }
+  } catch (error) {
+    badge.textContent = "Backend: local only";
+    badge.className = "badge";
+  }
+}
+
+async function generateWithBackend() {
+  const button = document.getElementById("backendBtn");
+  const output = document.getElementById("sermonOutput");
+
+  const payload = {
+    passage: clean(document.getElementById("passage").value) || "Selected passage",
+    theme: clean(document.getElementById("theme").value) || "Faithfulness to Christ",
+    audience: clean(document.getElementById("audience").value),
+    length: clean(document.getElementById("length").value),
+    mode: clean(document.getElementById("mode").value),
+    father: clean(document.getElementById("father").value),
+    notes: clean(document.getElementById("notes").value)
+  };
+
+  button.disabled = true;
+  button.textContent = "Generating...";
+  output.innerHTML = `
+    <h2>Backend AI generation in progress</h2>
+    <p>The server-side function is preparing a conservative Orthodox sermon draft.</p>
+    <div class="note">If this fails, use the local sermon generator. The app still works without backend AI.</div>
+  `;
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || "Backend generation failed.");
+    }
+
+    currentMarkdown = data.markdown || "";
+    if (!currentMarkdown) throw new Error("The backend returned an empty sermon.");
+
+    output.innerHTML = markdownToHtml(currentMarkdown);
+  } catch (error) {
+    output.innerHTML = `
+      <h2>Backend unavailable</h2>
+      <p>${escapeHtml(error.message || "The backend function could not generate a sermon.")}</p>
+      <div class="note warning">
+        This usually means the Cloudflare Pages Function is not deployed yet, or the OPENAI_API_KEY secret has not been added.
+        Click <strong>Generate local sermon</strong> to use the built-in local generator.
+      </div>
+    `;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Generate with backend AI";
+    checkBackendHealth();
+  }
+}
+
+
+document.getElementById("generateBtn").addEventListener("click", generateSermon);
+document.getElementById("backendBtn").addEventListener("click", generateWithBackend);
+document.getElementById("copyBtn").addEventListener("click", copySermon);
+document.getElementById("saveBtn").addEventListener("click", saveSermon);
+document.getElementById("downloadBtn").addEventListener("click", downloadMarkdown);
+document.getElementById("clearSavedBtn").addEventListener("click", clearSaved);
+document.getElementById("evidenceSearch").addEventListener("input", renderEvidence);
+document.getElementById("evidenceType").addEventListener("change", renderEvidence);
+document.getElementById("eschatologySelect").addEventListener("change", renderEschatology);
+
+renderEvidence();
+renderFathers();
+renderEschatologyOptions();
+renderSaved();
+checkBackendHealth();
+</script>
+</body>
+</html>
