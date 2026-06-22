@@ -1,0 +1,17 @@
+{
+  "name": "carissa-enoch-github-pages",
+  "version": "2.0.0",
+  "description": "GitHub Pages static devotional Book of Enoch study app for Carissa.",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/smoke-test.mjs"
+  },
+  "keywords": [
+    "enoch",
+    "devotional",
+    "github-pages",
+    "static-site"
+  ],
+  "license": "MIT",
+  "devDependencies": {}
+}

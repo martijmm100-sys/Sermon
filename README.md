@@ -1,122 +1,97 @@
-# Orthodox Sermon Forge with Cloudflare Backend
+# Carissa's Enoch Study
 
-This package improves the standalone Orthodox Sermon Forge app by adding optional Cloudflare Pages Functions.
+A GitHub Pages–friendly devotional study app for reading and understanding *The Book of Enoch* in the R. H. Charles translation.
 
-The app still works as a normal static HTML app if you do not configure the backend.
+This version was rebuilt as a **static website** so GitHub Pages can open it directly. There is no Node/Express backend required for the live GitHub Pages site.
 
-## File tree
-
-```text
-orthodox-sermon-forge-backend/
-  index.html
-  README.md
-  _headers
-  functions/
-    api/
-      generate.js
-      health.js
-```
-
-## What each file does
+## File structure
 
 ```text
-index.html
+carissa-enoch-github-pages/
+├── index.html
+├── assets/
+│   ├── css/
+│   │   └── styles.css
+│   ├── js/
+│   │   ├── app.js
+│   │   ├── parser.js
+│   │   ├── starter-book.js
+│   │   ├── storage.js
+│   │   └── study-engine.js
+│   ├── data/
+│   │   └── source-manifest.json
+│   └── img/
+│       └── cross.svg
+├── tests/
+│   └── smoke-test.mjs
+├── package.json
+├── SOURCE_NOTICE.md
+├── LICENSE
+├── .nojekyll
+└── README.md
 ```
 
-The front-end app. It works locally and can generate sermons without any backend.
+## How to open locally
 
-```text
-functions/api/health.js
-```
+Use a small local web server. Do **not** rely on double-clicking `index.html`, because modern browsers may block JavaScript module imports from `file://`.
 
-A small backend health-check endpoint at:
+Fastest Visual Studio Code method:
 
-```text
-/api/health
-```
+1. Install the **Live Server** extension.
+2. Right-click `index.html`.
+3. Choose **Open with Live Server**.
 
-It tells the app whether the backend exists and whether an OpenAI API key is configured. It never reveals the key.
-
-```text
-functions/api/generate.js
-```
-
-The secure server-side sermon generator endpoint at:
-
-```text
-/api/generate
-```
-
-The browser sends sermon settings to this endpoint. The function calls OpenAI from Cloudflare's server environment. Your API key is never placed in the browser.
-
-```text
-_headers
-```
-
-Basic security headers for the deployed site.
-
-## Cloudflare Pages settings
-
-Use:
-
-```text
-Framework preset: None
-Build command: leave blank
-Build output directory: /
-```
-
-Cloudflare Pages Functions are detected from the root `functions/` folder.
-
-## Required Cloudflare secret for backend AI
-
-In Cloudflare:
-
-1. Go to your Pages project.
-2. Open **Settings**.
-3. Open **Variables and Secrets**.
-4. Add a secret named:
-
-```text
-OPENAI_API_KEY
-```
-
-5. Paste your real OpenAI API key.
-6. Save.
-7. Redeploy.
-
-Optional variable:
-
-```text
-OPENAI_MODEL
-```
-
-Recommended starter value:
-
-```text
-gpt-4.1-mini
-```
-
-You may change that to a model available on your OpenAI account.
-
-## Local testing
-
-You can double-click `index.html` and the local sermon generator will work.
-
-The backend AI button only works after deployment to Cloudflare Pages with the functions folder and secret configured.
-
-## Git Bash upload commands
+Alternative terminal method:
 
 ```bash
-cd ~/Desktop/orthodox-sermon-forge-backend
-
-git init
-git add .
-git commit -m "Add Orthodox Sermon Forge backend functions"
-git branch -M main
-git remote add origin https://github.com/YOUR-GITHUB-USERNAME/orthodox-sermon-forge-backend.git
-git push -u origin main
+python -m http.server 5500
 ```
 
-## Safety warning
+Then open:
 
-Do not push API keys, passwords, `.env`, `.dev.vars`, proprietary company data, customer data, copyrighted books you do not have permission to publish, or confidential pastoral/family notes to GitHub.
+```text
+http://localhost:5500
+```
+
+## How to upload to GitHub
+
+1. Unzip this folder.
+2. Create a new GitHub repository.
+3. Upload the **contents** of this folder, not just the zip file.
+4. Make sure `index.html` is at the repository root.
+5. Go to **Settings → Pages**.
+6. Under **Build and deployment**, choose:
+   - Source: `Deploy from a branch`
+   - Branch: `main`
+   - Folder: `/root`
+7. Save.
+8. GitHub will provide a Pages URL.
+
+## Why this structure works better
+
+GitHub Pages is for static sites. This version uses only HTML, CSS, JavaScript, SVG, and browser storage. It does not require an Express server, database, npm install, or Render deployment.
+
+## Full text behavior
+
+The app has three layers:
+
+1. **Browser cache** — once a full R. H. Charles text is loaded, it is saved locally in the browser.
+2. **Native text loader** — attempts to fetch and parse the public-domain Project Gutenberg source.
+3. **Manual paste fallback** — if browser CORS blocks the fetch, paste the Project Gutenberg HTML/text once in the Text Loader tab.
+4. **Embedded source portal** — the Full Reader tab also embeds the official Project Gutenberg text page.
+
+A starter excerpt is bundled so the app always opens cleanly, even when the browser blocks cross-origin text loading.
+
+## Local tests
+
+Node is not needed to run the website, but you can run the smoke test if Node is installed:
+
+```bash
+npm test
+```
+
+## Browser storage
+
+Notes, favorites, reading progress, theme, settings, and cached full-text data are saved in the browser with `localStorage`.
+
+Use **Backup app data** before clearing browser history or switching computers.
